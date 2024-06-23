@@ -39,6 +39,22 @@ func NewClient(cl *openai.Client) *Client {
 	}
 }
 
+func GetConfig(authToken string) openai.ClientConfig{
+	return openai.DefaultConfig(authToken)
+}
+
+func ConfigSetBaseURL(config openai.ClientConfig, baseurl string) openai.ClientConfig {
+	config.BaseURL = baseurl
+	return config
+}
+
+func GetNewClientWithConfig(config openai.ClientConfig) *Client{
+	cl := openai.NewClientWithConfig(config)
+	return &Client{
+		client: cl,
+	}
+}
+
 func (Client) SupportsStreaming() bool {
 	return true
 }

@@ -8,9 +8,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/ryszard/agency/agent"
 	"github.com/ryszard/agency/client"
-	"github.com/ryszard/agency/client/exp/anthropic"
+	// "github.com/ryszard/agency/client/exp/anthropic"
 	"github.com/ryszard/agency/client/exp/huggingface"
 	"github.com/ryszard/agency/client/openai"
 	log "github.com/sirupsen/logrus"
@@ -37,14 +38,24 @@ func main() {
 	var cl client.Client
 	switch *platform {
 	case "openai":
-		cl = openai.New(os.Getenv("OPENAI_API_KEY"))
+		err := godotenv.Load("../../.env")
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+		apiKey := os.Getenv("OPENAI_API_KEY")
+		baseurl := os.Getenv("OPENAI_BASE_URL")
+		// cl = openai.New(apiKey)
+		config := openai.GetConfig(apiKey)
+		config = openai.ConfigSetBaseURL(config, baseurl)
+		cl = openai.GetNewClientWithConfig(config)
+		
 	case "huggingface":
 		cl = huggingface.New(os.Getenv("HUGGINGFACE_API_KEY"))
-	case "anthropic":
-		cl, err = anthropic.New(os.Getenv("ANTHROPIC_API_KEY"))
-		if err != nil {
-			log.Fatal(err)
-		}
+	// case "anthropic":
+	// 	cl, err = anthropic.New(os.Getenv("ANTHROPIC_API_KEY"))
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
 	default:
 		log.Fatalf("unknown platform: %s", *platform)
 	}
